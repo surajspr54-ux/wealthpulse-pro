@@ -1,8 +1,5 @@
 export const dynamic = 'force-static'
 
-import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
-
 const STATES = [
   {slug:'alabama',name:'Alabama',avgHome:215000,rate:7.1,tax:5.0},
   {slug:'alaska',name:'Alaska',avgHome:310000,rate:7.0,tax:0},
@@ -60,18 +57,20 @@ export async function generateStaticParams() {
   return STATES.map(s => ({ state: s.slug }))
 }
 
-export async function generateMetadata({ params }: { params: { state: string } }): Promise<Metadata> {
-  const state = STATES.find(s => s.slug === params.state)
+export async function generateMetadata({ params }: { params: Promise<{ state: string }> }) {
+  const { state: stateSlug } = await params
+  const state = STATES.find(s => s.slug === stateSlug)
   if (!state) return { title: 'Not Found' }
   return {
     title: 'Mortgage Calculator ' + state.name + ' 2024 | Home Loan Rates',
-    description: 'Free ' + state.name + ' mortgage calculator. Average home price $' + state.avgHome.toLocaleString() + ', current rate ' + state.rate + '%. Calculate monthly payments instantly.',
+    description: 'Free ' + state.name + ' mortgage calculator. Average home price $' + state.avgHome.toLocaleString() + ', current rate ' + state.rate + '%.',
   }
 }
 
-export default function StateMortgagePage({ params }: { params: { state: string } }) {
-  const state = STATES.find(s => s.slug === params.state)
-  if (!state) notFound()
+export default async function StateMortgagePage({ params }: { params: Promise<{ state: string }> }) {
+  const { state: stateSlug } = await params
+  const state = STATES.find(s => s.slug === stateSlug)
+  if (!state) return <div>Not Found</div>
 
   const loan = state.avgHome * 0.8
   const r = state.rate / 100 / 12
@@ -89,9 +88,7 @@ export default function StateMortgagePage({ params }: { params: { state: string 
         <div style={{fontSize:'13px',color:'#6b7280',marginBottom:'24px'}}>
           <a href="/" style={{color:'#6b7280',textDecoration:'none'}}>Home</a> {'->'} <a href="/mortgage" style={{color:'#6b7280',textDecoration:'none'}}>Mortgage</a> {'->'} {state.name}
         </div>
-        <h1 style={{fontSize:'40px',fontWeight:'800',marginBottom:'16px'}}>
-          {state.name} Mortgage Calculator 2024
-        </h1>
+        <h1 style={{fontSize:'40px',fontWeight:'800',marginBottom:'16px'}}>{state.name} Mortgage Calculator 2024</h1>
         <p style={{color:'#9ca3af',fontSize:'18px',marginBottom:'32px',lineHeight:'1.7'}}>
           Calculate your monthly mortgage payment for a home in {state.name}. Average home prices around ${state.avgHome.toLocaleString()} with current rates at {state.rate}%.
         </p>
