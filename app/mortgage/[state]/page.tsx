@@ -54,7 +54,7 @@ const STATES = [
   {slug:'wyoming',name:'Wyoming',avgHome:295000,rate:7.0,tax:0},
 ]
 
-export async function generateStaticParams() {
+`export const dynamic = 'force-static'() {
   return STATES.map(s => ({ state: s.slug }))
 }
 
