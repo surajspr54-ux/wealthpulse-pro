@@ -1,3 +1,5 @@
+export const dynamic = 'force-static'
+
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -54,7 +56,7 @@ const STATES = [
   {slug:'wyoming',name:'Wyoming',avgHome:295000,rate:7.0,tax:0},
 ]
 
-`export const dynamic = 'force-static'() {
+export async function generateStaticParams() {
   return STATES.map(s => ({ state: s.slug }))
 }
 
@@ -62,8 +64,8 @@ export async function generateMetadata({ params }: { params: { state: string } }
   const state = STATES.find(s => s.slug === params.state)
   if (!state) return { title: 'Not Found' }
   return {
-    title: `Mortgage Calculator ${state.name} 2024 | Home Loan Rates`,
-    description: `Free ${state.name} mortgage calculator. Average home price $${state.avgHome.toLocaleString()}, current rate ${state.rate}%. Calculate monthly payments instantly.`,
+    title: 'Mortgage Calculator ' + state.name + ' 2024 | Home Loan Rates',
+    description: 'Free ' + state.name + ' mortgage calculator. Average home price $' + state.avgHome.toLocaleString() + ', current rate ' + state.rate + '%. Calculate monthly payments instantly.',
   }
 }
 
@@ -81,101 +83,66 @@ export default function StateMortgagePage({ params }: { params: { state: string 
     <div style={{minHeight:'100vh',background:'#030712',color:'white',fontFamily:'sans-serif'}}>
       <nav style={{padding:'16px 32px',borderBottom:'1px solid rgba(255,255,255,0.1)',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
         <a href="/" style={{textDecoration:'none'}}><b style={{fontSize:'20px',color:'white'}}>WealthPulse<span style={{color:'#34d399'}}>Pro</span></b></a>
-        <a href="/tools/mortgage" style={{color:'#9ca3af',textDecoration:'none',fontSize:'14px'}}>← Mortgage Calculator</a>
+        <a href="/tools/mortgage" style={{color:'#9ca3af',textDecoration:'none',fontSize:'14px'}}>Back to Calculator</a>
       </nav>
-
       <div style={{maxWidth:'900px',margin:'0 auto',padding:'40px 20px'}}>
-        {/* Breadcrumb */}
         <div style={{fontSize:'13px',color:'#6b7280',marginBottom:'24px'}}>
-          <a href="/" style={{color:'#6b7280',textDecoration:'none'}}>Home</a> → <a href="/mortgage" style={{color:'#6b7280',textDecoration:'none'}}>Mortgage</a> → {state.name}
+          <a href="/" style={{color:'#6b7280',textDecoration:'none'}}>Home</a> {'->'} <a href="/mortgage" style={{color:'#6b7280',textDecoration:'none'}}>Mortgage</a> {'->'} {state.name}
         </div>
-
-        {/* Hero */}
         <h1 style={{fontSize:'40px',fontWeight:'800',marginBottom:'16px'}}>
           {state.name} Mortgage Calculator 2024
         </h1>
         <p style={{color:'#9ca3af',fontSize:'18px',marginBottom:'32px',lineHeight:'1.7'}}>
-          Calculate your monthly mortgage payment for a home in {state.name}. 
-          With average home prices around ${state.avgHome.toLocaleString()} and current rates at {state.rate}%, 
-          use our free calculator to plan your purchase.
+          Calculate your monthly mortgage payment for a home in {state.name}. Average home prices around ${state.avgHome.toLocaleString()} with current rates at {state.rate}%.
         </p>
-
-        {/* Stats */}
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px',marginBottom:'40px'}}>
           {[
-            {label:'Avg Home Price',val:`$${state.avgHome.toLocaleString()}`},
-            {label:'Current Rate',val:`${state.rate}%`},
-            {label:'Est. Monthly Payment',val:`$${monthly.toLocaleString()}`,highlight:true},
-          ].map(s=>(
-            <div key={s.label} style={{background: s.highlight ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.04)',border: s.highlight ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(255,255,255,0.08)',borderRadius:'16px',padding:'20px',textAlign:'center'}}>
-              <div style={{color:'#9ca3af',fontSize:'12px',marginBottom:'8px'}}>{s.label}</div>
-              <div style={{color: s.highlight ? '#34d399' : 'white',fontSize:'24px',fontWeight:'800'}}>{s.val}</div>
+            {label:'Avg Home Price',val:'$'+state.avgHome.toLocaleString()},
+            {label:'Current Rate',val:state.rate+'%'},
+            {label:'Est. Monthly',val:'$'+monthly.toLocaleString(),highlight:true},
+          ].map(item=>(
+            <div key={item.label} style={{background:item.highlight?'rgba(16,185,129,0.1)':'rgba(255,255,255,0.04)',border:item.highlight?'1px solid rgba(16,185,129,0.3)':'1px solid rgba(255,255,255,0.08)',borderRadius:'16px',padding:'20px',textAlign:'center'}}>
+              <div style={{color:'#9ca3af',fontSize:'12px',marginBottom:'8px'}}>{item.label}</div>
+              <div style={{color:item.highlight?'#34d399':'white',fontSize:'24px',fontWeight:'800'}}>{item.val}</div>
             </div>
           ))}
         </div>
-
-        {/* Calculator Link */}
         <div style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'20px',padding:'32px',marginBottom:'40px',textAlign:'center'}}>
-          <h2 style={{fontSize:'24px',fontWeight:'700',marginBottom:'12px'}}>Use Our Free Mortgage Calculator</h2>
+          <h2 style={{fontSize:'24px',fontWeight:'700',marginBottom:'12px'}}>Free Mortgage Calculator</h2>
           <p style={{color:'#9ca3af',marginBottom:'24px'}}>Get exact monthly payments for your {state.name} home</p>
-          <a href="/tools/mortgage" style={{background:'#10b981',color:'white',padding:'16px 40px',borderRadius:'12px',textDecoration:'none',fontWeight:'700',fontSize:'18px'}}>
-            Calculate Now →
-          </a>
+          <a href="/tools/mortgage" style={{background:'#10b981',color:'white',padding:'16px 40px',borderRadius:'12px',textDecoration:'none',fontWeight:'700',fontSize:'18px'}}>Calculate Now</a>
         </div>
-
-        {/* Content */}
-        <div style={{lineHeight:'1.8',color:'#9ca3af'}}>
-          <h2 style={{color:'white',fontSize:'24px',fontWeight:'700',marginBottom:'16px'}}>
-            Mortgage Rates in {state.name}
-          </h2>
-          <p style={{marginBottom:'24px'}}>
-            Current mortgage rates in {state.name} average around {state.rate}% for a 30-year fixed loan. 
-            On a median-priced home of ${state.avgHome.toLocaleString()} with 20% down payment, 
-            your monthly principal and interest would be approximately ${monthly.toLocaleString()}.
-            Over 30 years, you would pay ${totalInterest.toLocaleString()} in total interest.
-          </p>
-
-          <h2 style={{color:'white',fontSize:'24px',fontWeight:'700',marginBottom:'16px'}}>
-            {state.name} Housing Market
-          </h2>
-          <p style={{marginBottom:'24px'}}>
-            The median home value in {state.name} is ${state.avgHome.toLocaleString()}. 
-            {state.tax === 0 
-              ? ` ${state.name} has no state income tax, making it very attractive for homebuyers.`
-              : ` ${state.name} has a state income tax rate of up to ${state.tax}%.`
-            } Property taxes vary by county and should be factored into your monthly budget.
-          </p>
-
-          <h2 style={{color:'white',fontSize:'24px',fontWeight:'700',marginBottom:'16px'}}>
-            FAQ — {state.name} Mortgage
-          </h2>
-          {[
-            {q:`What is the average mortgage rate in ${state.name}?`, a:`Current average mortgage rates in ${state.name} are approximately ${state.rate}% for a 30-year fixed loan.`},
-            {q:`What is the average home price in ${state.name}?`, a:`The median home price in ${state.name} is approximately $${state.avgHome.toLocaleString()} as of 2024.`},
-            {q:`Does ${state.name} have state income tax?`, a: state.tax === 0 ? `No! ${state.name} has no state income tax.` : `Yes, ${state.name} has a top income tax rate of ${state.tax}%.`},
-          ].map(faq=>(
-            <div key={faq.q} style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'12px',padding:'20px',marginBottom:'12px'}}>
-              <div style={{color:'white',fontWeight:'600',marginBottom:'8px'}}>{faq.q}</div>
-              <div style={{color:'#9ca3af',fontSize:'14px'}}>{faq.a}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Other States */}
+        <h2 style={{color:'white',fontSize:'24px',fontWeight:'700',marginBottom:'16px'}}>Mortgage Rates in {state.name}</h2>
+        <p style={{color:'#9ca3af',marginBottom:'24px',lineHeight:'1.8'}}>
+          Current mortgage rates in {state.name} average around {state.rate}% for a 30-year fixed loan. On a median-priced home of ${state.avgHome.toLocaleString()} with 20% down, your monthly payment would be approximately ${monthly.toLocaleString()}. Over 30 years, total interest paid would be ${totalInterest.toLocaleString()}.
+        </p>
+        <h2 style={{color:'white',fontSize:'24px',fontWeight:'700',marginBottom:'16px'}}>{state.name} Housing Market</h2>
+        <p style={{color:'#9ca3af',marginBottom:'24px',lineHeight:'1.8'}}>
+          The median home value in {state.name} is ${state.avgHome.toLocaleString()}.
+          {state.tax === 0 ? ' '+state.name+' has no state income tax.' : ' '+state.name+' has a state income tax rate of up to '+state.tax+'%.'}
+        </p>
+        <h2 style={{color:'white',fontSize:'24px',fontWeight:'700',marginBottom:'16px'}}>FAQ</h2>
+        {[
+          {q:'What is the average mortgage rate in '+state.name+'?', a:'Current average rates in '+state.name+' are approximately '+state.rate+'% for a 30-year fixed loan.'},
+          {q:'What is the average home price in '+state.name+'?', a:'The median home price in '+state.name+' is approximately $'+state.avgHome.toLocaleString()+' as of 2024.'},
+          {q:'Does '+state.name+' have state income tax?', a:state.tax===0?'No! '+state.name+' has no state income tax.':'Yes, '+state.name+' has a top rate of '+state.tax+'%.'},
+        ].map(faq=>(
+          <div key={faq.q} style={{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'12px',padding:'20px',marginBottom:'12px'}}>
+            <div style={{color:'white',fontWeight:'600',marginBottom:'8px'}}>{faq.q}</div>
+            <div style={{color:'#9ca3af',fontSize:'14px'}}>{faq.a}</div>
+          </div>
+        ))}
         <div style={{marginTop:'40px'}}>
           <h2 style={{color:'white',fontSize:'20px',fontWeight:'700',marginBottom:'16px'}}>Other States</h2>
           <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
             {STATES.filter(s=>s.slug!==state.slug).slice(0,20).map(s=>(
-              <a key={s.slug} href={`/mortgage/${s.slug}`} style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'8px',padding:'6px 12px',textDecoration:'none',color:'#9ca3af',fontSize:'13px'}}>
-                {s.name}
-              </a>
+              <a key={s.slug} href={'/mortgage/'+s.slug} style={{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'8px',padding:'6px 12px',textDecoration:'none',color:'#9ca3af',fontSize:'13px'}}>{s.name}</a>
             ))}
           </div>
         </div>
       </div>
-
       <footer style={{textAlign:'center',padding:'32px',borderTop:'1px solid rgba(255,255,255,0.05)',color:'#4b5563',fontSize:'14px',marginTop:'60px'}}>
-        © 2024 WealthPulse Pro · wealthpulsedaily.com
+        2024 WealthPulse Pro - wealthpulsedaily.com
       </footer>
     </div>
   )
